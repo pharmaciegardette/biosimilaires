@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biosimilaires — Référentiel Pharmacien</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --surface: #ffffff;
+    --surface2: #faf9f6;
+    --border: #e2ddd6;
+    --accent: #2d5a8e;
+    --accent2: #c4783a;
+    --accent3: #3a8e6e;
+    --danger: #c0392b;
+    --warn: #d68910;
+    --text: #1a1714;
+    --text2: #5a5550;
+    --text3: #8a847e;
+    --tag-bg: #edf2f8;
+    --tag-text: #2d5a8e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent);
+    color: white;
+    padding: 32px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 280px; height: 280px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    right: 80px; bottom: -80px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .header-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  header p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.72);
+    font-weight: 300;
+  }
+  .header-meta {
+    margin-top: 20px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+  }
+
+  /* SEARCH + FILTER */
+  .controls {
+    padding: 24px 40px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+  }
+  input[type="search"] {
+    width: 100%;
+    padding: 9px 12px 9px 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="search"]:focus { border-color: var(--accent); }
+
+  .filter-btn {
+    padding: 8px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .results-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text3);
+    font-weight: 500;
+  }
+
+  /* MAIN */
+  main {
+    padding: 32px 40px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: box-shadow 0.25s, transform 0.25s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .card:hover {
+    box-shadow: 0 8px 32px rgba(45,90,142,0.1);
+    transform: translateY(-2px);
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .group-badge {
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .card-title-wrap { flex: 1; }
+  .molecule-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .reference-name {
+    font-size: 13px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+  .reference-name span {
+    font-weight: 600;
+    color: var(--accent2);
+  }
+  .biosimilars-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .chip {
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #d0dff0;
+  }
+  .chevron {
+    color: var(--text3);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .card.open .chevron { transform: rotate(180deg); }
+
+  /* EXPANDABLE BODY */
+  .card-body {
+    display: none;
+    padding: 0;
+  }
+  .card.open .card-body { display: block; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: none;
+  }
+
+  .info-section {
+    padding: 20px 24px;
+    border-right: 1px solid var(--border);
+  }
+  .info-section:last-child { border-right: none; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .section-label .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .indic-label { color: var(--accent3); }
+  .indic-label .dot { background: var(--accent3); }
+  .ei-label { color: var(--danger); }
+  .ei-label .dot { background: var(--danger); }
+  .precaution-label { color: var(--accent2); }
+  .precaution-label .dot { background: var(--accent2); }
+
+  ul.info-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  ul.info-list li {
+    font-size: 12.5px;
+    color: var(--text2);
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+  }
+  ul.info-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--border);
+    font-size: 11px;
+  }
+
+  /* SPECIFIC CONDITIONS BANNER */
+  .conditions-banner {
+    background: #fdf8f3;
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  .conditions-banner-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+  .conditions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cond-tag {
+    background: white;
+    border: 1px solid #e8d5c0;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    color: #7a4f28;
+    line-height: 1.4;
+  }
+
+  /* SANDOZ HIGHLIGHT */
+  .chip.sandoz {
+    background: linear-gradient(135deg, #e8f4fd, #d0eaf8);
+    color: #1a5c8a;
+    border: 1.5px solid #4da3d4;
+    font-weight: 700;
+    position: relative;
+    padding-right: 28px;
+  }
+  .chip.sandoz::after {
+    content: 'S';
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a5c8a;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 14px;
+    text-align: center;
+  }
+
+  .sandoz-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e8f4fd;
+    border: 1.5px solid #4da3d4;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #1a5c8a;
+    font-weight: 600;
+  }
+  .sandoz-legend .chip.sandoz { font-size: 11px; padding: 2px 22px 2px 8px; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    header, .controls, main { padding-left: 20px; padding-right: 20px; }
+    .info-grid { grid-template-columns: 1fr; }
+    .info-section { border-right: none; border-bottom: 1px solid var(--border); }
+    .info-section:last-child { border-bottom: none; }
+    header h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Référentiel Officinal</div>
+  <h1>Médicaments Biologiques Similaires</h1>
+  <p>Groupes de substitution autorisés — Indications, effets indésirables &amp; conseils au patient</p>
+  <div class="header-meta">
+    <span class="meta-pill">11 groupes</span>
+    <span class="meta-pill">Substitution encadrée</span>
+    <span class="meta-pill">Usage pharmacien</span>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="searchInput" placeholder="Rechercher molécule, médicament…" oninput="filterCards()">
+  </div>
+  <button class="filter-btn active" onclick="filterAll(this)">Tous</button>
+  <button class="filter-btn" onclick="filterGroup('anticorps', this)">Anticorps / Biologiques</button>
+  <button class="filter-btn" onclick="filterGroup('hémato', this)">Hématologie</button>
+  <button class="filter-btn" onclick="filterGroup('ophta', this)">Ophtalmologie</button>
+  <span class="results-count" id="resultsCount">11 groupes affichés</span>
+  <span class="sandoz-legend"><span class="chip sandoz">NOM®</span> = Biosimilaire Sandoz</span>
+</div>
+
+<main id="cardContainer"></main>
+
+<script>
+const SANDOZ = new Set([
+  "ZARZIO®","ZIEXTENZO®","ERELZI®","HYRIMOZ®","BINOCRIT®","PYZCHIVA®"
+]);
+
+const data = [
+  {
+    group: 1,
+    molecule: "Filgrastim",
+    reference: "NEUPOGEN®",
+    biosimilars: ["ACCOFIL®","GRASTOFIL®","NIVESTIM®","RATIOGRASTIM®","TEVAGRASTIM®","ZARZIO®","ZEFYLTI®"],
+    tags: ["hémato"],
+    indications: [
+      "Réduction de la durée des neutropénies sévères induites par chimiothérapie myélosuppressive",
+      "Mobilisation des cellules souches hématopoïétiques pour autogreffe",
+      "Neutropénie sévère chronique congénitale, cyclique ou idiopathique",
+      "Neutropénie chez les patients infectés par le VIH",
+      "Mobilisation des CSH chez les donneurs sains pour allogreffe"
+    ],
+    sideEffects: [
+      "Douleurs musculo-squelettiques (très fréquentes, dose-dépendantes)",
+      "Céphalées",
+      "Réactions au site d'injection (érythème, douleur)",
+      "Splénomégalie (surveillance recommandée)",
+      "Élévation transitoire des enzymes hépatiques et de l'acide urique",
+      "Thrombocytopénie"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C), ne pas congeler",
+      "Peut être sorti du réfrigérateur 30 min avant injection pour améliorer le confort",
+      "Expliquer la technique d'injection sous-cutanée et la rotation des sites",
+      "Signaler immédiatement toute douleur abdominale intense (risque de rupture splénique)",
+      "Informer des douleurs osseuses prévisibles et de leur gestion (paracétamol)"
+    ],
+    conditions: []
+  },
+  {
+    group: 2,
+    molecule: "Pegfilgrastim",
+    reference: "NEULASTA®",
+    biosimilars: ["CEGFILA®","DYRUPEG®","FULPHILA®","GRASUSTEK®","NYVEPRIA®","PELGRAZ®","PELMEG®","STIMUFEND®","VIVLIPEG®","ZIEXTENZO®"],
+    tags: ["hémato"],
+    indications: [
+      "Réduction de la durée des neutropénies sévères et de l'incidence des neutropénies fébriles induites par chimiothérapie cytotoxique (cancers non myéloïdes)",
+      "Une seule injection par cycle de chimiothérapie (longue durée d'action)"
+    ],
+    sideEffects: [
+      "Douleurs musculo-squelettiques (très fréquentes)",
+      "Réactions au site d'injection",
+      "Splénomégalie voire rupture splénique (rare mais grave)",
+      "Syndrome de détresse respiratoire aiguë (SDRA, rare)",
+      "Réaction allergique/anaphylaxie",
+      "Syndrome de drépanocytose aiguë chez patients drépanocytaires"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C), ne pas agiter",
+      "Injection 24 à 72 h après la chimiothérapie (respecter le délai prescrit)",
+      "Vérifier la date de péremption et l'aspect de la solution (limpide, incolore)",
+      "Alerter sur les signes de rupture splénique : douleur hypocondre gauche irradiant vers l'épaule",
+      "Ne pas administrer entre J1 et J14 après une chimiothérapie myélosuppressive"
+    ],
+    conditions: []
+  },
+  {
+    group: 3,
+    molecule: "Ranibizumab",
+    reference: "LUCENTIS®",
+    biosimilars: ["RANIVISIO®","BYOOVIZ®","RIMMYRAH®","XIMLUCI®"],
+    tags: ["ophta"],
+    indications: [
+      "Dégénérescence maculaire liée à l'âge (DMLA) — forme néovasculaire (humide)",
+      "Baisse visuelle due à un œdème maculaire diabétique (OMD)",
+      "Baisse visuelle due à une occlusion de branche ou de la veine centrale de la rétine",
+      "Baisse visuelle due à une néovascularisation choroïdienne dans la myopie forte"
+    ],
+    sideEffects: [
+      "Conjonctivite, irritation oculaire (très fréquents)",
+      "Douleur oculaire, corps flottants vitréens",
+      "Augmentation de la pression intraoculaire (transitoire)",
+      "Hémorragie sous-conjonctivale",
+      "Endophtalmie (infection grave, rare mais à surveiller)",
+      "Décollement de rétine, déchirure rétinienne (rares)"
+    ],
+    pharmacistAdvice: [
+      "Médicament administré uniquement par injection intravitréenne par un ophtalmologue — ne pas délivrer pour auto-injection",
+      "Conserver au réfrigérateur (2–8 °C), protéger de la lumière",
+      "Expliquer que la vision peut être floue immédiatement après l'injection — ne pas conduire",
+      "Signaler rapidement tout signe d'infection oculaire (rougeur, douleur intense, perte visuelle brutale)",
+      "Rappeler l'importance des injections régulières pour maintenir l'effet thérapeutique",
+      "Vérifier l'absence de traitement anticoagulant non contrôlé (risque hémorragique)"
+    ],
+    conditions: []
+  },
+  {
+    group: 4,
+    molecule: "Tériparatide",
+    reference: "FORSTEO®",
+    biosimilars: ["LIVOGIVA®","MOVYMIA®","SONDELBAY®","TERROSA®"],
+    tags: ["rhumato"],
+    indications: [
+      "Ostéoporose sévère chez la femme ménopausée à haut risque de fracture",
+      "Ostéoporose sévère chez l'homme à haut risque de fracture",
+      "Ostéoporose cortisonique sévère à haut risque de fracture"
+    ],
+    sideEffects: [
+      "Nausées, vomissements (fréquents)",
+      "Céphalées, étourdissements",
+      "Crampes aux membres inférieurs",
+      "Hypercalcémie transitoire (surveiller la calcémie)",
+      "Hypotension orthostatique (en début de traitement)",
+      "Douleurs articulaires et au site d'injection"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C) ; après 1ère utilisation, peut se conserver jusqu'à 28 jours au réfrigérateur",
+      "Ne pas congeler, ne pas exposer à la chaleur ou à la lumière directe",
+      "Former le patient à l'utilisation du stylo : capuchon, déclenchement, retrait de l'aiguille",
+      "Injecter en sous-cutané dans la cuisse ou l'abdomen, debout ou assis (risque d'hypotension orthostatique)",
+      "Durée maximale de traitement : 24 mois sur l'ensemble de la vie",
+      "Signaler tout symptôme de type hypercalcémie (fatigue, confusion, nausées)"
+    ],
+    conditions: [
+      "Le prescripteur peut indiquer le type de dispositif d'administration à privilégier",
+      "Dispositifs d'administration factices disponibles auprès des laboratoires",
+      "Accompagnement à l'apprentissage du nouveau dispositif en officine",
+      "Retour possible à la spécialité initialement délivrée si nécessaire"
+    ]
+  },
+  {
+    group: 5,
+    molecule: "Étanercept",
+    reference: "ENBREL®",
+    biosimilars: ["BENEPALI®","ERELZI®","NEPEXTO®"],
+    tags: ["anticorps","rhumato","dermato"],
+    indications: [
+      "Polyarthrite rhumatoïde modérée à sévère (adulte)",
+      "Arthrite juvénile idiopathique polyarticulaire (enfant ≥ 2 ans)",
+      "Rhumatisme psoriasique",
+      "Spondylarthrite ankylosante",
+      "Psoriasis en plaques modéré à sévère"
+    ],
+    sideEffects: [
+      "Infections des voies respiratoires supérieures (très fréquentes)",
+      "Réactions au site d'injection (érythème, prurit, douleur)",
+      "Céphalées",
+      "Risque d'infections graves (tuberculose, infections opportunistes)",
+      "Réactivation de l'hépatite B",
+      "Anticorps antinucléaires (lupus médicamenteux rare)"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C) ; peut rester à température ambiante ≤ 25 °C jusqu'à 4 semaines",
+      "Ne pas secouer vigoureusement",
+      "Rotation des sites d'injection (cuisse, abdomen, bras) ; noter les sites",
+      "Informer sur le risque infectieux accru — consulter rapidement en cas de fièvre",
+      "Dépistage tuberculose obligatoire avant initiation (IDR ou IGRA)",
+      "Ne pas vacciner avec vaccins vivants sous traitement",
+      "Substitution uniquement à dosage identique en substance active"
+    ],
+    conditions: [
+      "Le prescripteur peut indiquer le type de dispositif d'administration à privilégier",
+      "Dispositifs d'administration factices disponibles",
+      "Accompagnement à l'apprentissage du nouveau dispositif en officine",
+      "Retour possible à la spécialité initialement délivrée si nécessaire",
+      "Substitution à même dosage en substance active uniquement"
+    ]
+  },
+  {
+    group: 6,
+    molecule: "Adalimumab",
+    reference: "HUMIRA®",
+    biosimilars: ["AMGEVITA®","AMSPARITY®","HUKYNDRA®","HULIO®","HYRIMOZ®","IDACIO®","IMRALDI®","LIBMYRIS®","YUFLYMA®"],
+    tags: ["anticorps","rhumato","gastro","dermato"],
+    indications: [
+      "Polyarthrite rhumatoïde modérée à sévère",
+      "Arthrite idiopathique juvénile (enfant ≥ 2 ans)",
+      "Rhumatisme psoriasique et spondylarthrite ankylosante",
+      "Maladie de Crohn (adulte et pédiatrique ≥ 6 ans)",
+      "Rectocolite hémorragique modérée à sévère",
+      "Psoriasis en plaques modéré à sévère",
+      "Uvéite non infectieuse"
+    ],
+    sideEffects: [
+      "Infections respiratoires et urinaires (très fréquentes)",
+      "Réactions au site d'injection (très fréquentes : érythème, démangeaison)",
+      "Céphalées, douleurs musculo-squelettiques",
+      "Risque élevé d'infections graves (tuberculose, infections fongiques)",
+      "Réactivation virale (hépatite B)",
+      "Troubles hématologiques (leucopénie, thrombocytopénie)"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C) ; sortir 15–30 min avant injection",
+      "Ne pas congeler, ne pas exposer à la lumière directe",
+      "Vérifier le volume d'injection : ne pas substituer par un biosimilaire à volume supérieur",
+      "Rotation et notation des sites d'injection (éviter zones lésées ou sensibles)",
+      "Dépistage tuberculose avant traitement — rappeler la surveillance régulière",
+      "Informer sur les signes d'alerte : infections, fièvre, réactions cutanées sévères",
+      "Vérifier les vaccinations avant initiation (vaccins vivants contre-indiqués)"
+    ],
+    conditions: [
+      "Le prescripteur peut indiquer le type de dispositif à privilégier",
+      "Dispositifs d'administration factices disponibles auprès des laboratoires",
+      "Accompagnement à l'apprentissage du nouveau dispositif en officine",
+      "Retour possible à la spécialité initialement délivrée si nécessaire",
+      "Substitution à même dosage en substance active uniquement",
+      "⚠️ Ne pas substituer par un biosimilaire à volume d'injection supérieur"
+    ]
+  },
+  {
+    group: 7,
+    molecule: "Énoxaparine",
+    reference: "LOVENOX®",
+    biosimilars: ["ENOXAPARINE ARROW®","ENOXAPARINE BECAT®","ENOXAPARINE BIOGARAN®","ENOXAPARINE CRUSIA®","ENOXAPARINE LEDRAXEN®","ENOXAPARINE TEVA®","ENOXAPARINE VENIPHARM®","GHEMAXAN®","INHIXA®","ENOXAPARINE EG®","ENOXAPARINE ZENTIVA®"],
+    tags: ["hémato"],
+    indications: [
+      "Prophylaxie des thromboses veineuses profondes (TVP) en chirurgie et médecine",
+      "Traitement curatif des TVP et de l'embolie pulmonaire (EP)",
+      "Traitement de l'angor instable et de l'infarctus du myocarde sans sus-décalage ST",
+      "Prévention de la coagulation lors de l'hémodialyse"
+    ],
+    sideEffects: [
+      "Hémorragies (très fréquentes — risque majeur à surveiller)",
+      "Hématomes au site d'injection (très fréquents)",
+      "Thrombocytopénie induite par l'héparine (TIH) — type I bénigne, type II grave",
+      "Élévation des transaminases (fréquente, transitoire)",
+      "Hyperkaliémie (surtout insuffisance rénale)",
+      "Nécrose cutanée au site d'injection (rare)"
+    ],
+    pharmacistAdvice: [
+      "Conserver à température ambiante (≤ 25 °C) ou au réfrigérateur selon la spécialité",
+      "Injection sous-cutanée dans le tissu adipeux abdominal, aiguille perpendiculaire — expliquer le pli cutané",
+      "Ne pas faire saigner le site d'injection : ne pas frotter après l'injection",
+      "Substitution uniquement à même dosage (UI ou mg)",
+      "Signaler immédiatement tout saignement inhabituel (gencives, selles noires, hématomes spontanés)",
+      "Surveiller la numération plaquettaire (J5–J10 du traitement) — alerter si plaquettes < 100 G/L",
+      "Adapter la posologie en cas d'insuffisance rénale sévère (DFG < 30 ml/min)"
+    ],
+    conditions: [
+      "Dispositifs d'administration factices disponibles auprès des laboratoires",
+      "Accompagnement à l'apprentissage du nouveau dispositif en officine",
+      "Retour possible à la spécialité initialement délivrée si nécessaire",
+      "Substitution à même dosage en substance active uniquement"
+    ]
+  },
+  {
+    group: 8,
+    molecule: "Follitropine alfa",
+    reference: "GONAL-F®",
+    biosimilars: ["BEMFOLA®","OVALEAP®"],
+    tags: ["gynéco"],
+    indications: [
+      "Anovulation (y compris syndrome des ovaires polykystiques) chez la femme",
+      "Stimulation ovarienne contrôlée pour procréation médicalement assistée (FIV, ICSI)",
+      "Stimulation de la spermatogénèse en cas d'hypogonadisme hypogonadotrope chez l'homme"
+    ],
+    sideEffects: [
+      "Syndrome d'hyperstimulation ovarienne (SHO) — risque grave, peut être sévère",
+      "Céphalées et fatigue (fréquents)",
+      "Douleurs abdominales, ballonnements",
+      "Réactions au site d'injection (douleur, hématome)",
+      "Grossesses multiples (FIV)",
+      "Thromboembolie (associée à SHO sévère)"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C) ; après 1ère utilisation du stylo multidose : ≤ 25 °C pendant 28 jours",
+      "Expliquer précisément le schéma posologique prescrit (protocole de stimulation individuel)",
+      "En cas de substitution stylo multidose ↔ unidose : vérifier que la posologie exacte peut être délivrée",
+      "Si délivrance de cartouches : s'assurer que le patient possède le stylo adapté (compatible)",
+      "Reconnaître les signes de SHO : distension abdominale, nausées, prise de poids rapide — consulter en urgence",
+      "Surveillance échographique et biologique régulière pendant la stimulation"
+    ],
+    conditions: [
+      "Dispositifs d'administration factices disponibles auprès des laboratoires",
+      "Accompagnement incluant la compréhension du protocole et du schéma posologique",
+      "Retour possible à la spécialité initialement délivrée si nécessaire",
+      "Délivrer une spécialité permettant l'administration de la posologie exacte prescrite",
+      "En cas de cartouches : vérifier la compatibilité avec le stylo du patient"
+    ]
+  },
+  {
+    group: 9,
+    molecule: "Époétine",
+    reference: "EPREX®",
+    biosimilars: ["ABSEAMED®","BINOCRIT®","RETACRIT®"],
+    tags: ["hémato","néphro"],
+    indications: [
+      "Anémie symptomatique d'origine rénale chez patients en insuffisance rénale chronique",
+      "Anémie chez patients adultes recevant une chimiothérapie (tumeurs non myéloïdes)",
+      "Réduction des transfusions allogéniques avant chirurgie orthopédique majeure",
+      "Anémie chez patients infectés par le VIH traités par zidovudine"
+    ],
+    sideEffects: [
+      "Hypertension artérielle (fréquente — surveillance TA recommandée)",
+      "Céphalées (fréquentes)",
+      "Réactions grippales (frissons, fièvre) en début de traitement",
+      "Thromboses (fistules artério-veineuses, événements cardiovasculaires)",
+      "Aplasie pure des globules rouges (PRCA) — rare mais grave, liée aux anticorps anti-EPO",
+      "Réactions cutanées et au site d'injection"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C), ne pas congeler, protéger de la lumière",
+      "Ne pas agiter — dénature la protéine",
+      "Substitution uniquement à même dosage (UI/kg ou UI totales)",
+      "Surveiller la pression artérielle régulièrement, surtout en début de traitement",
+      "Signaler toute perte d'efficacité progressive (suspicion d'anticorps anti-EPO → arrêt impératif)",
+      "Vérifier le statut martial : supplémentation en fer souvent nécessaire pour efficacité optimale",
+      "Chez le patient dialysé : injection IV possible, sinon SC"
+    ],
+    conditions: [
+      "Dispositifs d'administration factices disponibles auprès des laboratoires",
+      "Accompagnement à l'apprentissage du nouveau dispositif en officine",
+      "Retour possible à la spécialité initialement délivrée si nécessaire",
+      "Substitution à même dosage en substance active uniquement"
+    ]
+  },
+  {
+    group: 10,
+    molecule: "Aflibercept",
+    reference: "EYLEA®",
+    biosimilars: ["AFIVEG®","AFQLIR®","AHZANTIVE®","BAIAMA®","EYDENZELT®","MYNZELPI®","PAVBLU®","YESAFILI®"],
+    tags: ["ophta"],
+    indications: [
+      "Dégénérescence maculaire liée à l'âge (DMLA) néovasculaire (humide)",
+      "Baisse visuelle liée à l'œdème maculaire diabétique (OMD)",
+      "Œdème maculaire secondaire à une occlusion veineuse rétinienne (OVR)"
+    ],
+    sideEffects: [
+      "Douleur et hémorragie conjonctivale au site d'injection (très fréquents)",
+      "Corps flottants (myodésopsies), sensation de corps étranger",
+      "Augmentation de la pression intraoculaire",
+      "Cataracte",
+      "Endophtalmie (infection grave — rare mais urgence ophtalmologique)",
+      "Décollement de rétine ou du vitré"
+    ],
+    pharmacistAdvice: [
+      "Médicament administré uniquement par injection intravitréenne par un ophtalmologue spécialisé",
+      "Conserver au réfrigérateur (2–8 °C), protéger de la lumière",
+      "Expliquer que la vision peut être temporairement floue après l'injection (ne pas conduire)",
+      "Signaler immédiatement toute douleur oculaire sévère, rougeur intense ou baisse brutale de vision",
+      "Rappeler le suivi régulier : injections répétées selon protocole (phase d'attaque puis entretien)",
+      "Informer sur l'utilisation de la spécialité EYLEA 114,3 mg/ml (seringue préremplie) — dosage différent"
+    ],
+    conditions: []
+  },
+  {
+    group: 11,
+    molecule: "Ustékinumab",
+    reference: "STELARA®",
+    biosimilars: ["IMULDOSA®","OTULFI®","PYZCHIVA®","STEQEYMA®","USRENTY®","UZPRUVO®","WEZENLA®","YESINTEK®"],
+    tags: ["anticorps","dermato","gastro"],
+    indications: [
+      "Psoriasis en plaques modéré à sévère (adulte et enfant ≥ 6 ans)",
+      "Rhumatisme psoriasique actif",
+      "Maladie de Crohn modérée à sévère (adulte)",
+      "Rectocolite hémorragique modérée à sévère (adulte) — ⚠️ Vérifier l'AMM du biosimilaire délivré"
+    ],
+    sideEffects: [
+      "Infections des voies respiratoires supérieures (très fréquentes)",
+      "Réactions au site d'injection (érythème, douleur)",
+      "Céphalées, fatigue",
+      "Infections graves (risque augmenté)",
+      "Réactions allergiques incluant anaphylaxie (rares)",
+      "Zona (herpes zoster)"
+    ],
+    pharmacistAdvice: [
+      "Conserver au réfrigérateur (2–8 °C), protéger de la lumière",
+      "Sortir 30 min avant injection pour injection SC confortable",
+      "Première dose IV en milieu hospitalier, puis injections SC en entretien",
+      "Vérifier impérativement que l'indication du patient est dans le périmètre de l'AMM du biosimilaire délivré (en particulier : Crohn pédiatrique, RCH)",
+      "Bilan infectieux pré-thérapeutique (tuberculose, hépatites)",
+      "Ne pas vacciner avec vaccins vivants sous traitement",
+      "Informer le patient : l'échange entre pharmacien et patient peut être nécessaire pour garantir une substitution sécurisée"
+    ],
+    conditions: [
+      "Le prescripteur peut indiquer le type de dispositif à privilégier",
+      "Dispositifs d'administration factices disponibles auprès des laboratoires",
+      "Accompagnement à l'apprentissage du nouveau dispositif en officine",
+      "Retour possible à la spécialité initialement délivrée si nécessaire",
+      "⚠️ Vérifier la continuité du traitement selon les indications thérapeutiques de l'AMM",
+      "⚠️ Les AMM de STELARA et biosimilaires peuvent différer (Crohn pédiatrique, RCH) — substitution possible uniquement dans le périmètre de l'AMM du biosimilaire"
+    ]
+  }
+];
+
+function renderCards(items) {
+  const container = document.getElementById('cardContainer');
+  container.innerHTML = '';
+  document.getElementById('resultsCount').textContent = `${items.length} groupe${items.length > 1 ? 's' : ''} affiché${items.length > 1 ? 's' : ''}`;
+
+  items.forEach((d, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.animationDelay = `${idx * 0.04}s`;
+    card.dataset.tags = d.tags.join(',');
+    card.dataset.searchable = (d.molecule + ' ' + d.reference + ' ' + d.biosimilars.join(' ')).toLowerCase();
+
+    const conditionsHTML = d.conditions.length ? `
+      <div class="conditions-banner">
+        <div class="conditions-banner-label">⚙️ Conditions spécifiques de substitution</div>
+        <div class="conditions-list">
+          ${d.conditions.map(c => `<span class="cond-tag">${c}</span>`).join('')}
+        </div>
+      </div>` : '';
+
+    card.innerHTML = `
+      <div class="card-header" onclick="toggleCard(this)">
+        <span class="group-badge">Groupe ${d.group}</span>
+        <div class="card-title-wrap">
+          <div class="molecule-name">${d.molecule}</div>
+          <div class="reference-name">Référence : <span>${d.reference}</span></div>
+          <div class="biosimilars-chips">
+            ${d.biosimilars.map(b => `<span class="chip${SANDOZ.has(b) ? ' sandoz' : ''}">${b}</span>`).join('')}
+          </div>
+        </div>
+        <svg class="chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-section">
+            <div class="section-label indic-label"><span class="dot"></span>Indications thérapeutiques</div>
+            <ul class="info-list">${d.indications.map(i => `<li>${i}</li>`).join('')}</ul>
+          </div>
+          <div class="info-section">
+            <div class="section-label ei-label"><span class="dot"></span>Effets indésirables fréquents</div>
+            <ul class="info-list">${d.sideEffects.map(e => `<li>${e}</li>`).join('')}</ul>
+          </div>
+          <div class="info-section">
+            <div class="section-label precaution-label"><span class="dot"></span>Conseils pharmacien au patient</div>
+            <ul class="info-list">${d.pharmacistAdvice.map(p => `<li>${p}</li>`).join('')}</ul>
+          </div>
+        </div>
+        ${conditionsHTML}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function toggleCard(header) {
+  const card = header.parentElement;
+  card.classList.toggle('open');
+}
+
+let activeTag = null;
+
+function filterAll(btn) {
+  activeTag = null;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterCards();
+}
+
+function filterGroup(tag, btn) {
+  activeTag = tag;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterCards();
+}
+
+function filterCards() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = data;
+  if (activeTag) filtered = filtered.filter(d => d.tags.includes(activeTag));
+  if (query) filtered = filtered.filter(d =>
+    (d.molecule + ' ' + d.reference + ' ' + d.biosimilars.join(' ')).toLowerCase().includes(query)
+  );
+  renderCards(filtered);
+}
+
+// Initial render
+renderCards(data);
+</script>
+</body>
+</html>
